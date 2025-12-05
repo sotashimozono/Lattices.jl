@@ -7,5 +7,5 @@ Here is a implementation of DynamicalModels including Lorenz eq., van der Pol eq
 The models implemented in this module is below.
 
 ```@autodocs
-Modules = [AbstractLattices]
+Modules = [Lattices]
 ```

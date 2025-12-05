@@ -63,7 +63,6 @@ export UnitCell
 - Kagome: カゴメ格子
 """
 abstract type AbstractTopology{D} <: AbstractLattice{D} end
-include("lattices.jl")
 
 """
 Lattice2D{Topology<:AbstractTopology, T, B<:AbstractBoundaryCondition}
