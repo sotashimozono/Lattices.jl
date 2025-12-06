@@ -3,11 +3,11 @@ ENV["GKSwstype"] = "100"
 using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 
-using Lattices
+using Lattice2D
 using Plots
 using LinearAlgebra
 
-const OUT_DIR = joinpath(pkgdir(Lattices), "docs", "src", "assets", "figures", "lattice")
+const OUT_DIR = joinpath(pkgdir(Lattice2D), "docs", "src", "assets", "figures", "lattice")
 mkpath(OUT_DIR)
 
 function plot_lattice_structure(lat::Lattice2D, title_str)

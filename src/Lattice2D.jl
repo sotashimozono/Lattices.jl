@@ -1,4 +1,4 @@
-module Lattices
+module Lattice2D
 
 include("boundarycondition.jl")
 include("abstractlattices.jl")

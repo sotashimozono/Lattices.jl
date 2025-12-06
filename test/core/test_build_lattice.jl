@@ -1,6 +1,6 @@
-struct TestSimpleSquare <: Lattices.AbstractTopology{2} end
+struct TestSimpleSquare <: Lattice2D.AbstractTopology{2} end
 
-function Lattices.get_unit_cell(::Type{TestSimpleSquare})
+function Lattice2D.get_unit_cell(::Type{TestSimpleSquare})
     a1 = [1.0, 0.0]
     a2 = [0.0, 1.0]
     conns = [

@@ -1,9 +1,9 @@
 ENV["GKSwstype"] = "100"
 
-using Lattices, Test, Plots
+using Lattice2D, Test, Plots
 using LinearAlgebra
 
-const FIG_BASE = joinpath(pkgdir(Lattices), "docs", "src", "assets", "figures")
+const FIG_BASE = joinpath(pkgdir(Lattice2D), "docs", "src", "assets", "figures")
 const FIG_LAT = joinpath(FIG_BASE, "lattice")
 const PATHS = Dict(
     :geometry => joinpath(FIG_LAT, "geometry")
