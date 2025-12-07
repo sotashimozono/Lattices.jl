@@ -123,15 +123,14 @@ function generate_penrose_substitution(generations::Int; method::SubstitutionMet
         tiles = inflate_penrose_tiles(tiles)
     end
     
-    # Extract all unique positions
-    positions = Vector{Float64}[]
+    # Extract all unique positions using a Set for O(n) complexity
+    position_set = Set{Vector{Float64}}()
     for tile in tiles
         for v in tile.vertices
-            if !(v in positions)
-                push!(positions, v)
-            end
+            push!(position_set, v)
         end
     end
+    positions = collect(position_set)
     
     params = Dict{Symbol,Any}(
         :generations => generations,
@@ -166,14 +165,19 @@ end
 """
     inflate_fat_rhombus(tile::Tile{2,Float64})
 Inflate a fat rhombus into smaller tiles.
+
+NOTE: This is a simplified placeholder implementation that scales the tile
+rather than applying proper Penrose inflation rules. A complete implementation
+would subdivide the fat rhombus into 1 fat and 2 thin rhombi according to
+the Penrose matching rules.
 """
 function inflate_fat_rhombus(tile::Tile{2,Float64})
-    # Simplified inflation rule
-    # In reality, this would subdivide the rhombus according to Penrose rules
+    # TODO: Implement proper Penrose inflation rules
+    # Proper rule: Fat rhombus → 1 fat + 2 thin rhombi
+    # Current: Simplified scaling for demonstration
     v = tile.vertices
     
     # Scale and create new tiles
-    # This is a placeholder - proper implementation would follow exact Penrose rules
     scaled_tile = Tile{2,Float64}(
         [PHI * vertex for vertex in v],
         1,
@@ -186,9 +190,14 @@ end
 """
     inflate_thin_rhombus(tile::Tile{2,Float64})
 Inflate a thin rhombus into smaller tiles.
+
+NOTE: This is a simplified placeholder implementation. A complete implementation
+would subdivide the thin rhombus into 1 fat rhombus according to Penrose rules.
 """
 function inflate_thin_rhombus(tile::Tile{2,Float64})
-    # Simplified inflation rule
+    # TODO: Implement proper Penrose inflation rules
+    # Proper rule: Thin rhombus → 1 fat rhombus
+    # Current: Simplified scaling for demonstration
     v = tile.vertices
     
     scaled_tile = Tile{2,Float64}(

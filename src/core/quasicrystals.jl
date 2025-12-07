@@ -36,18 +36,23 @@ This is an alternative algorithmic approach.
 struct SubstitutionMethod <: AbstractGenerationMethod end
 
 """
-    QuasicrystalData{D,T}
+    QuasicrystalData{D,T,TileType}
 Data structure holding the generated quasicrystal pattern.
 - `positions::Vector{Vector{T}}`: positions of vertices/sites
-- `tiles::Vector{Tile{D,T}}`: list of tiles in the pattern
+- `tiles::Vector{TileType}`: list of tiles in the pattern
 - `generation_method::AbstractGenerationMethod`: method used to generate
 - `parameters::Dict{Symbol,Any}`: generation parameters
 """
-struct QuasicrystalData{D,T}
+struct QuasicrystalData{D,T,TileType}
     positions::Vector{Vector{T}}
-    tiles::Vector{Any}  # Will be specialized based on quasicrystal type
+    tiles::Vector{TileType}
     generation_method::AbstractGenerationMethod
     parameters::Dict{Symbol,Any}
+end
+
+# Convenience constructor that infers TileType
+function QuasicrystalData{D,T}(positions::Vector{Vector{T}}, tiles::Vector{TT}, method::AbstractGenerationMethod, params::Dict{Symbol,Any}) where {D,T,TT}
+    return QuasicrystalData{D,T,TT}(positions, tiles, method, params)
 end
 
 """

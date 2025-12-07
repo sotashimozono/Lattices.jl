@@ -122,15 +122,14 @@ function generate_ammann_beenker_substitution(generations::Int; method::Substitu
         tiles = inflate_ammann_beenker_tiles(tiles)
     end
     
-    # Extract positions
-    positions = Vector{Float64}[]
+    # Extract unique positions using a Set for O(n) complexity
+    position_set = Set{Vector{Float64}}()
     for tile in tiles
         for v in tile.vertices
-            if !(v in positions)
-                push!(positions, v)
-            end
+            push!(position_set, v)
         end
     end
+    positions = collect(position_set)
     
     params = Dict{Symbol,Any}(
         :generations => generations,

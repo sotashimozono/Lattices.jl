@@ -3,6 +3,7 @@ Visualization utilities for quasicrystals.
 """
 
 using Plots
+using Colors
 
 """
     visualize_quasicrystal_positions(qc_data::QuasicrystalData{1,T}; kwargs...) where T
