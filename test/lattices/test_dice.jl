@@ -4,8 +4,8 @@
         # Basis Vectors are separated by 60 degrees and unit length (triangular)
         a1, a2 = uc.basis
         @test dot(a1, a2) ≈ cos(π/3) atol=1e-10
-        @test norm(a1) ≈ sqrt(1) atol=1e-10
-        @test norm(a2) ≈ sqrt(1) atol=1e-10
+        @test norm(a1) ≈ 1.0 atol=1e-10
+        @test norm(a2) ≈ 1.0 atol=1e-10
         # 3 sublattices: Hub(1), RimA(2), RimB(3)
         @test length(uc.sublattice_positions) == 3
 
