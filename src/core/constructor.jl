@@ -135,3 +135,129 @@ function build_lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int;
     )
 end
 export build_lattice
+
+"""
+    get_site_index(lat::Lattice, x::Int, y::Int, s::Int=1)
+
+Get the linear site index from lattice coordinates (x, y) and sublattice index s.
+For single-sublattice lattices, s defaults to 1.
+
+# Arguments
+- `lat::Lattice`: The lattice structure
+- `x::Int`: x-coordinate (1 to Lx)
+- `y::Int`: y-coordinate (1 to Ly)
+- `s::Int`: sublattice index (1 to number of sublattices), defaults to 1
+
+# Returns
+- `Int`: The linear site index
+
+# Examples
+```julia
+lat = build_lattice(Square, 4, 4)
+idx = get_site_index(lat, 2, 3)  # Get index at (2,3)
+
+lat = build_lattice(Honeycomb, 4, 4)
+idx_A = get_site_index(lat, 1, 1, 1)  # Get sublattice A at (1,1)
+idx_B = get_site_index(lat, 1, 1, 2)  # Get sublattice B at (1,1)
+```
+"""
+function get_site_index(lat::Lattice, x::Int, y::Int, s::Int=1)
+    # Get number of sublattices from the lattice
+    # We can infer this from the site_map structure
+    n_sub = length(lat.sublattice_ids) ÷ (lat.Lx * lat.Ly)
+    
+    # Validate inputs
+    if x < 1 || x > lat.Lx
+        throw(ArgumentError("x must be in range [1, $(lat.Lx)], got $x"))
+    end
+    if y < 1 || y > lat.Ly
+        throw(ArgumentError("y must be in range [1, $(lat.Ly)], got $y"))
+    end
+    if s < 1 || s > n_sub
+        throw(ArgumentError("s must be in range [1, $n_sub], got $s"))
+    end
+    
+    return _coord_to_index(lat.index_method, x, y, s, lat.Lx, lat.Ly, n_sub)
+end
+export get_site_index
+
+"""
+    get_position(lat::Lattice, idx::Int)
+
+Get the spatial position (coordinates) of a site given its linear index.
+
+# Arguments
+- `lat::Lattice`: The lattice structure
+- `idx::Int`: The linear site index
+
+# Returns
+- `Vector{Float64}`: The position vector [x, y] in real space
+
+# Examples
+```julia
+lat = build_lattice(Square, 4, 4)
+pos = get_position(lat, 5)  # Get position of site 5
+```
+"""
+function get_position(lat::Lattice, idx::Int)
+    if idx < 1 || idx > lat.N
+        throw(ArgumentError("idx must be in range [1, $(lat.N)], got $idx"))
+    end
+    return lat.positions[idx]
+end
+export get_position
+
+"""
+    get_coordinates(lat::Lattice, idx::Int)
+
+Get the lattice coordinates (x, y, sublattice) from a linear site index.
+
+# Arguments
+- `lat::Lattice`: The lattice structure
+- `idx::Int`: The linear site index
+
+# Returns
+- `Tuple{Int, Int, Int}`: A tuple (x, y, s) where x, y are unit cell coordinates and s is sublattice index
+
+# Examples
+```julia
+lat = build_lattice(Honeycomb, 4, 4)
+x, y, s = get_coordinates(lat, 10)
+```
+"""
+function get_coordinates(lat::Lattice, idx::Int)
+    if idx < 1 || idx > lat.N
+        throw(ArgumentError("idx must be in range [1, $(lat.N)], got $idx"))
+    end
+    
+    n_sub = length(lat.sublattice_ids) ÷ (lat.Lx * lat.Ly)
+    s = lat.sublattice_ids[idx]
+    
+    # For RowMajorIndexing, we can reverse the calculation
+    if isa(lat.index_method, RowMajorIndexing)
+        # idx = cell_index_0based * n_sub + s
+        # where cell_index_0based = (y - 1) * Lx + (x - 1)
+        cell_index_0based = (idx - s) ÷ n_sub
+        y = cell_index_0based ÷ lat.Lx + 1
+        x = cell_index_0based % lat.Lx + 1
+        return (x, y, s)
+    elseif isa(lat.index_method, ColMajorIndexing)
+        # idx = cell_index_0based * n_sub + s
+        # where cell_index_0based = (x - 1) * Ly + (y - 1)
+        cell_index_0based = (idx - s) ÷ n_sub
+        x = cell_index_0based ÷ lat.Ly + 1
+        y = cell_index_0based % lat.Ly + 1
+        return (x, y, s)
+    elseif isa(lat.index_method, SnakeIndexing)
+        # For SnakeIndexing, we need to reverse the snake pattern
+        cell_index_0based = (idx - s) ÷ n_sub
+        y = cell_index_0based ÷ lat.Lx + 1
+        x_map = cell_index_0based % lat.Lx + 1
+        # Reverse the snake pattern
+        x = isodd(y) ? x_map : lat.Lx + 1 - x_map
+        return (x, y, s)
+    else
+        error("Unknown indexing method: $(typeof(lat.index_method))")
+    end
+end
+export get_coordinates
