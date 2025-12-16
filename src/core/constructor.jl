@@ -56,8 +56,13 @@ end
 Construct a lattice with the specified topology, size, and boundary conditions.
 this function is available if unitcell information is defined.
 """
-function build_lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int; 
-    boundary::AbstractBoundaryCondition=PBC(), index_method::AbstractIndexing=RowMajorIndexing())
+function build_lattice(
+    Topology::Type{<:AbstractTopology},
+    Lx::Int,
+    Ly::Int;
+    boundary::AbstractBoundaryCondition=PBC(),
+    index_method::AbstractIndexing=RowMajorIndexing(),
+)
     # --- 1. Initialize Lattice Parameters ---
     uc = get_unit_cell(Topology)
     n_sub = length(uc.sublattice_positions)
@@ -83,7 +88,7 @@ function build_lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int;
             cell_origin = (x - 1) * a1 + (y - 1) * a2
             for s in 1:n_sub
                 i = base_id + (s - 1)
-                
+
                 # positions, sublattice_ids の設定
                 positions[i] = cell_origin + uc.sublattice_positions[s]
                 sublattice_ids[i] = s
@@ -118,8 +123,11 @@ function build_lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int;
             # dst = dst_base + (conn.dst_sub - 1)
             dst = site_map[cx, cy] + (conn.dst_sub - 1)
             # Vector calculation
-            d_vec = (conn.dx * a1 + conn.dy * a2) +
-                    (uc.sublattice_positions[conn.dst_sub] - uc.sublattice_positions[conn.src_sub])
+            d_vec =
+                (conn.dx * a1 + conn.dy * a2) + (
+                    uc.sublattice_positions[conn.dst_sub] -
+                    uc.sublattice_positions[conn.src_sub]
+                )
             push!(nn_table[src], dst)
             push!(nn_table[dst], src)
             push!(bonds, Bond(src, dst, conn.type, d_vec))
@@ -128,15 +136,27 @@ function build_lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int;
     # --- 3. Finalize ---
     recip_vecs = calc_reciprocal_vectors(uc.basis)
     is_bipartite = check_bipartite_bfs(N, nn_table)
-    return Lattice{Topology,Float64,typeof(boundary), typeof(index_method)}(
-        Lx, Ly, N, positions, nn_table, bonds,
-        uc.basis, recip_vecs, sublattice_ids, is_bipartite,
-        site_map, boundary, index_method
+    return Lattice{Topology,Float64,typeof(boundary),typeof(index_method)}(
+        Lx,
+        Ly,
+        N,
+        positions,
+        nn_table,
+        bonds,
+        uc.basis,
+        recip_vecs,
+        sublattice_ids,
+        is_bipartite,
+        site_map,
+        boundary,
+        index_method,
     )
 end
 export build_lattice
 
-Lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int; kwargs...) = build_lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int; kwargs...)
+function Lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int; kwargs...)
+    build_lattice(Topology::Type{<:AbstractTopology}, Lx::Int, Ly::Int; kwargs...)
+end
 """
     get_site_index(lat::Lattice, x::Int, y::Int, s::Int=1)
 
@@ -166,7 +186,7 @@ function get_site_index(lat::Lattice, x::Int, y::Int, s::Int=1)
     # Get number of sublattices from the lattice
     # We can infer this from the site_map structure
     n_sub = length(lat.sublattice_ids) ÷ (lat.Lx * lat.Ly)
-    
+
     # Validate inputs
     if x < 1 || x > lat.Lx
         throw(ArgumentError("x must be in range [1, $(lat.Lx)], got $x"))
@@ -177,7 +197,7 @@ function get_site_index(lat::Lattice, x::Int, y::Int, s::Int=1)
     if s < 1 || s > n_sub
         throw(ArgumentError("s must be in range [1, $n_sub], got $s"))
     end
-    
+
     return _coord_to_index(lat.index_method, x, y, s, lat.Lx, lat.Ly, n_sub)
 end
 export get_site_index
@@ -230,10 +250,10 @@ function get_coordinates(lat::Lattice, idx::Int)
     if idx < 1 || idx > lat.N
         throw(ArgumentError("idx must be in range [1, $(lat.N)], got $idx"))
     end
-    
+
     n_sub = length(lat.sublattice_ids) ÷ (lat.Lx * lat.Ly)
     s = lat.sublattice_ids[idx]
-    
+
     # For RowMajorIndexing, we can reverse the calculation
     if isa(lat.index_method, RowMajorIndexing)
         # idx = cell_index_0based * n_sub + s

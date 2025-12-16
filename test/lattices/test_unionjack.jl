@@ -37,16 +37,16 @@
 
             # total number of sites will be 2 * Lx * Ly
             @test lat_pbc.N == 2 * Lx * Ly
-            
+
             # UnionJack: Corner has coordination 8 (4 square + 4 diagonal), Center has coordination 4
             degrees = length.(lat_pbc.nearest_neighbors)
             sub_ids = lat_pbc.sublattice_ids
-            
+
             # Corner (sublattice 1) should have degree 8
             @test all(degrees[sub_ids .== 1] .== 8)
             # Center (sublattice 2) should have degree 4
             @test all(degrees[sub_ids .== 2] .== 4)
-            
+
             id_A = lat_pbc.site_map[1, 1]
             id_B = id_A + 1
             # Check if the neighbors contain the corresponding IDs
@@ -58,7 +58,7 @@
         end
         @testset "open boundary condition" begin
             lat_obc = build_lattice(UnionJack, Lx, Ly; boundary=OBC())
-            
+
             degrees = length.(lat_obc.nearest_neighbors)
             @test maximum(degrees) <= 8
             @test minimum(degrees) >= 1
@@ -67,7 +67,7 @@
             corner_A = lat_obc.site_map[1, 1]
             # It connects to B(1,1), A(2,1), A(1,2) -> at least 3
             @test length(lat_obc.nearest_neighbors[corner_A]) >= 3
-            
+
             # Bulk Corner site should have coordination close to 8
             bulk_A = lat_obc.site_map[2, 2]
             @test length(lat_obc.nearest_neighbors[bulk_A]) <= 8
@@ -78,17 +78,17 @@
         n_sub = 2 # UnionJack has 2 sublattices
         lat = build_lattice(UnionJack, Lx, Ly)
         uc = get_unit_cell(UnionJack)
-        
+
         for x in 1:Lx, y in 1:Ly
             base_idx = lat.site_map[x, y]
-            
+
             # Base index calc check
             expected_base = ((x - 1) + (y - 1) * Lx) * n_sub + 1
             @test base_idx == expected_base
-            
+
             # Sublattice position check
             cell_origin = (x-1)*lat.basis_vectors[1] + (y-1)*lat.basis_vectors[2]
-            
+
             # Check Corner and Center positions
             for s in 1:n_sub
                 pos = lat.positions[base_idx + s - 1]

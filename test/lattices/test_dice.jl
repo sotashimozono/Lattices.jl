@@ -40,17 +40,17 @@
 
             # total number of sites will be 3 * Lx * Ly
             @test lat_pbc.N == 3 * Lx * Ly
-            
+
             # Dice lattice: Hub has coordination 6, Rims have coordination 3
             degrees = length.(lat_pbc.nearest_neighbors)
             sub_ids = lat_pbc.sublattice_ids
-            
+
             # Hub (sublattice 1) should have degree 6
             @test all(degrees[sub_ids .== 1] .== 6)
             # Rim A and B (sublattices 2, 3) should have degree 3
             @test all(degrees[sub_ids .== 2] .== 3)
             @test all(degrees[sub_ids .== 3] .== 3)
-            
+
             # --- Connectivity Check (Corrected for proper Dice Geometry) ---
             # Get IDs for cell (1,1)
             id_Hub_11 = lat_pbc.site_map[1, 1]
@@ -77,14 +77,14 @@
 
         @testset "open boundary condition" begin
             lat_obc = build_lattice(Dice, Lx, Ly; boundary=OBC())
-            
+
             degrees = length.(lat_obc.nearest_neighbors)
             @test maximum(degrees) <= 6
             @test minimum(degrees) >= 0
 
             bulk_hub = lat_obc.site_map[2, 2]
             @test length(lat_obc.nearest_neighbors[bulk_hub]) <= 6
-            
+
             bulk_rim = lat_obc.site_map[2, 2] + 1
             @test length(lat_obc.nearest_neighbors[bulk_rim]) > 0
         end
@@ -95,17 +95,17 @@
         n_sub = 3 # Dice has 3 sublattices
         lat = build_lattice(Dice, Lx, Ly)
         uc = get_unit_cell(Dice)
-        
+
         for x in 1:Lx, y in 1:Ly
             base_idx = lat.site_map[x, y]
-            
+
             # Base index calc check (assuming RowMajor-like or standard construction)
             expected_base = ((x - 1) + (y - 1) * Lx) * n_sub + 1
             @test base_idx == expected_base
-            
+
             # Sublattice position check
             cell_origin = (x-1)*lat.basis_vectors[1] + (y-1)*lat.basis_vectors[2]
-            
+
             # Check Hub, RimA, RimB positions
             for s in 1:n_sub
                 pos = lat.positions[base_idx + s - 1]
