@@ -11,6 +11,17 @@ permissions:
   pull-requests: write
 
 jobs:
-  format-check:
-    name: "Format Check"
-    uses: "ITensor/ITensorActions/.github/workflows/FormatCheck.yml@main"
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+      
+      - name: Install JuliaFormatter
+        run: julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
+
+      - name: Run Format Check
+        run: |
+          julia -e 'using JuliaFormatter; not_needed = format(".", overwrite=false); exit(not_needed ? 0 : 1)'
